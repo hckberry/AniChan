@@ -1,0 +1,58 @@
+name: anichan
+description: "AniChan - a minimalist anime streaming client."
+publish_to: 'none'
+version: 1.0.0+1
+
+# Android package: com.anichan.app
+# Generate platform folders with:
+#   flutter create --org com.anichan --project-name anichan --platforms android .
+# then set applicationId "com.anichan.app" in android/app/build.gradle(.kts)
+
+environment:
+  sdk: ^3.10.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State / DI
+  provider: ^6.1.5+1
+
+  # Local storage
+  hive_ce: ^2.15.1
+  hive_ce_flutter: ^2.3.3
+  path_provider: ^2.1.5
+
+  # Networking / scraping
+  dio: ^5.9.0
+  html: ^0.15.6
+  crypto: ^3.0.6
+  encrypt: ^5.0.3
+
+  # Video playback
+  media_kit: ^1.2.6
+  media_kit_video: ^2.0.1
+  media_kit_libs_video: ^1.0.7
+
+  # OAuth (AniList / MAL)
+  flutter_web_auth_2: ^4.1.0
+
+  # Discord RPC (gateway websocket + keep-alive foreground service)
+  web_socket_channel: ^3.0.3
+  flutter_foreground_task: ^9.0.0
+  permission_handler: ^12.0.1
+
+  # UI
+  cached_network_image: ^3.4.1
+  url_launcher: ^6.3.2
+  intl: ^0.20.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/icon/anichan_icon.svg
