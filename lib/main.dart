@@ -4,7 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
-import 'package:hive_ce_flutter/hive_ce_flutter.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:provider/provider.dart';
@@ -49,7 +49,7 @@ class AppState extends ChangeNotifier {
 
   Color get background => Color(box.get('bg', defaultValue: 0xFF0E0E14));
   Future<void> setBackground(Color c) async {
-    await box.put('bg', c.toARGB32());
+    await box.put('bg', c.value);
     notifyListeners();
   }
 
