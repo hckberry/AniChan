@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FF7EB6"/>
+      <stop offset="1" stop-color="#7A5CFF"/>
+    </linearGradient>
+    <linearGradient id="play" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#FFE3F0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- background -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+
+  <!-- soft sakura petals -->
+  <g fill="#FFFFFF" opacity="0.28">
+    <ellipse cx="96" cy="108" rx="22" ry="12" transform="rotate(-30 96 108)"/>
+    <ellipse cx="430" cy="92" rx="18" ry="10" transform="rotate(35 430 92)"/>
+    <ellipse cx="452" cy="420" rx="24" ry="13" transform="rotate(-20 452 420)"/>
+    <ellipse cx="70" cy="400" rx="16" ry="9" transform="rotate(50 70 400)"/>
+  </g>
+
+  <!-- cat-ear speech bubble face -->
+  <path d="M120 200 L150 112 L228 164 Q256 156 284 164 L362 112 L392 200
+           Q408 232 408 272 L408 322 Q408 388 342 388 L170 388
+           Q104 388 104 322 L104 272 Q104 232 120 200 Z"
+        fill="#FFFFFF" opacity="0.18"/>
+  <path d="M120 200 L150 112 L228 164 Q256 156 284 164 L362 112 L392 200
+           Q408 232 408 272 L408 322 Q408 388 342 388 L170 388
+           Q104 388 104 322 L104 272 Q104 232 120 200 Z"
+        fill="none" stroke="#FFFFFF" stroke-width="12" stroke-linejoin="round"/>
+
+  <!-- play triangle -->
+  <path d="M222 238 L222 338 Q222 350 233 344 L322 294 Q333 288 322 282 L233 232 Q222 226 222 238 Z"
+        fill="url(#play)"/>
+
+  <!-- tail of the bubble -->
+  <path d="M170 388 L146 430 L212 388 Z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="12" stroke-linejoin="round"/>
