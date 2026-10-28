@@ -21,24 +21,33 @@ jobs:
           flutter-version: '3.19.0'
           channel: 'stable'
           
-      # Generates the missing Android boilerplate folders
+      # 1. Generate the missing Android folders
       - name: Generate Android Boilerplate
         run: flutter create . --org com.anichan --project-name anichan --platforms android
         
-      # Changes the package name to com.anichan.app
+      # 2. Fix the application ID
       - name: Fix Application ID
         run: sed -i 's/applicationId "com.anichan.anichan"/applicationId "com.anichan.app"/g' android/app/build.gradle
         
-      # Adds internet permission so streaming works
+      # 3. Force the Android SDK to version 35 so the video player doesn't crash
+      - name: Fix Compile SDK
+        run: |
+          sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 35/g' android/app/build.gradle
+          sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 35/g' android/app/build.gradle
+        
+      # 4. Add internet permission
       - name: Add Internet Permission
         run: sed -i '/<application/i \    <uses-permission android:name="android.permission.INTERNET"/>' android/app/src/main/AndroidManifest.xml
         
+      # 5. Install dependencies
       - name: Get Dependencies
         run: flutter pub get
         
+      # 6. Build the app
       - name: Build APK
         run: flutter build apk --release
         
+      # 7. Save the APK for download
       - uses: actions/upload-artifact@v4
         with:
           name: AniChan-Release-APK
