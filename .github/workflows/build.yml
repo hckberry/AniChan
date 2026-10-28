@@ -1,0 +1,45 @@
+name: Build AniChan APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+          channel: 'stable'
+          
+      # Generates the missing Android boilerplate folders
+      - name: Generate Android Boilerplate
+        run: flutter create . --org com.anichan --project-name anichan --platforms android
+        
+      # Changes the package name to com.anichan.app
+      - name: Fix Application ID
+        run: sed -i 's/applicationId "com.anichan.anichan"/applicationId "com.anichan.app"/g' android/app/build.gradle
+        
+      # Adds internet permission so streaming works
+      - name: Add Internet Permission
+        run: sed -i '/<application/i \    <uses-permission android:name="android.permission.INTERNET"/>' android/app/src/main/AndroidManifest.xml
+        
+      - name: Get Dependencies
+        run: flutter pub get
+        
+      - name: Build APK
+        run: flutter build apk --release
+        
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AniChan-Release-APK
+          path: build/app/outputs/flutter-apk/app-release.apk
