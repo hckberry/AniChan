@@ -1,0 +1,107 @@
+name: Build APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      # The repo has no android/ folder, so generate it fresh every build.
+      - name: Generate Android project
+        run: flutter create . --platforms=android --project-name anichan --org com.anichan
+
+      - name: Patch Android project
+        run: |
+          python3 - <<'PY'
+          import glob, re
+
+          # 1) minSdk 23 (required by flutter_foreground_task)
+          for f in glob.glob('android/app/build.gradle*'):
+              s = open(f).read()
+              s = re.sub(r'minSdkVersion\s+flutter\.minSdkVersion', 'minSdkVersion 23', s)
+              s = re.sub(r'minSdk\s*=\s*flutter\.minSdkVersion', 'minSdk = 23', s)
+              open(f, 'w').write(s)
+
+          # 2) Manifest: permissions, foreground service, OAuth callback
+          p = 'android/app/src/main/AndroidManifest.xml'
+          m = open(p).read()
+
+          perms = '''
+              <uses-permission android:name="android.permission.INTERNET"/>
+              <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+              <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
+              <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+              <uses-permission android:name="android.permission.WAKE_LOCK"/>
+          '''
+          comps = '''
+                  <service
+                      android:name="com.pravera.flutter_foreground_task.service.ForegroundService"
+                      android:foregroundServiceType="dataSync"
+                      android:exported="false"/>
+                  <activity
+                      android:name="com.linusu.flutter_web_auth_2.CallbackActivity"
+                      android:exported="true">
+                      <intent-filter android:label="flutter_web_auth_2">
+                          <action android:name="android.intent.action.VIEW"/>
+                          <category android:name="android.intent.category.DEFAULT"/>
+                          <category android:name="android.intent.category.BROWSABLE"/>
+                          <data android:scheme="anichan"/>
+                      </intent-filter>
+                  </activity>
+          '''
+          if 'FOREGROUND_SERVICE_DATA_SYNC' not in m:
+              m = m.replace('<application', perms + '<application', 1)
+              m = m.replace('</application>', comps + '</application>', 1)
+          open(p, 'w').write(m)
+
+          # 3) Don't fail on Java/Kotlin JVM-target mismatch inside old plugins
+          #    (volume_controller, wakelock_plus, etc.)
+          with open('android/gradle.properties', 'a') as g:
+              g.write('\nkotlin.jvm.target.validation.mode=warning\n')
+          PY
+
+      - run: flutter pub get
+
+      # Some plugins (e.g. media_kit_video) hardcode compileSdk 31, but their
+      # dependencies need 36. Raise any plugin compileSdk below 36 to 36.
+      - name: Raise plugin compileSdk to 36
+        run: |
+          python3 - <<'PY'
+          import glob, os, re
+          cache = os.environ.get('PUB_CACHE') or os.path.expanduser('~/.pub-cache')
+          pat = re.compile(r'(compileSdk(?:Version)?)(\s*=\s*|\s+)(\d+)')
+          def fix(m):
+              return m.group(0) if int(m.group(3)) >= 36 else m.group(1) + m.group(2) + '36'
+          n = 0
+          for f in glob.glob(cache + '/hosted/pub.dev/*/android/build.gradle*') + \
+                   glob.glob(cache + '/git/*/*/android/build.gradle*'):
+              s = open(f).read()
+              t = pat.sub(fix, s)
+              if t != s:
+                  open(f, 'w').write(t)
+                  n += 1
+                  print('patched', f)
+          print('patched files:', n)
+          PY
+
+      - run: flutter build apk --release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AniChan-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
