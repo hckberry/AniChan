@@ -6,6 +6,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'dart:isolate';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 
 /// ---------------------------------------------------------------------------
 /// Config (persisted by AppState in Hive as a plain map)
@@ -511,7 +513,6 @@ class DiscordBackground {
         channelId: 'anichan_rpc',
         channelName: 'AniChan Discord Presence',
         channelDescription: 'Keeps Discord Rich Presence connected.',
-        onlyAlertOnce: true,
       ),
       iosNotificationOptions: const IOSNotificationOptions(),
       foregroundTaskOptions: ForegroundTaskOptions(
@@ -527,7 +528,6 @@ class DiscordBackground {
     init();
     if (await FlutterForegroundTask.isRunningService) return;
     await FlutterForegroundTask.startService(
-      serviceId: 7101,
       notificationTitle: 'AniChan',
       notificationText: 'Discord Rich Presence active',
       callback: _startCallback,
@@ -548,11 +548,11 @@ void _startCallback() {
 
 class _KeepAliveHandler extends TaskHandler {
   @override
-  Future<void> onStart(DateTime timestamp, TaskStarter starter) async {}
+  Future<void> onStart(DateTime timestamp, SendPort? sendPort) async {}
 
   @override
-  void onRepeatEvent(DateTime timestamp) {}
+  void onRepeatEvent(DateTime timestamp, SendPort? sendPort) {}
 
   @override
-  Future<void> onDestroy(DateTime timestamp, bool isTimeout) async {}
+  Future<void> onDestroy(DateTime timestamp, SendPort? sendPort) async {}
 }
